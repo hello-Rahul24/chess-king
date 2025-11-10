@@ -1,6 +1,18 @@
 import type { Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { MOVE } from "../pages/Game";
+import Pawn from "./assests/Pawn";
+import Wpawn from "./assests/Wpawn";
+import Wrook from "./assests/Wrook";
+import Rook from "./assests/Rook";
+import Wknight from "./assests/Wknight";
+import Knight from "./assests/Knight";
+import Wbishop from "./assests/Wbishop";
+import Bishop from "./assests/Bishop";
+import Wqueen from "./assests/Wqueen";
+import Queen from "./assests/Queen";
+import Wking from "./assests/Wking";
+import King from "./assests/King";
 
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
@@ -26,6 +38,22 @@ export const Chessboard = ({
     const rank = 8 - rowIndex; // because top row is rank 8
     return `${file}${rank}` as Square;
   };
+  const pieceComponents: Record<string, JSX.Element> = {
+  wp: <Wpawn />,
+  bp: <Pawn />,
+  wr: <Wrook />,
+  br: <Rook />,
+  wn: <Wknight />,
+  bn: <Knight />,
+  wb: <Wbishop />,
+  bb: <Bishop />,
+  wq: <Wqueen />,
+  bq: <Queen />,
+  wk: <Wking />,
+  bk: <King />,
+};
+
+  
 
   return (
     <div>
@@ -65,7 +93,7 @@ export const Chessboard = ({
                 className={`flex justify-center items-center text-2xl font-semibold
                   ${isBlack ? "bg-gray-800 text-white" : "bg-gray-200 text-black"}`}
               >
-                {square ? square.type : ""}
+                {square ? pieceComponents[`${square.color}${square.type}`] : null}
               </div>
             );
           })
