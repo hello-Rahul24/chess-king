@@ -21,7 +21,8 @@ export const Chessboard = ({
   socket,
   chess,
   setBoard,
-  onTurnChange
+  onTurnChange,
+  color
 }: {
   board: ({
     square: Square;
@@ -32,37 +33,39 @@ export const Chessboard = ({
   chess: any;
   setBoard: any;
   onTurnChange: any;
+  color: string
 }) => {
   const [from, setFrom] = useState<Square | null>(null);
-  
+  const [highlighted, SetHighlighted] = useState<Square[]>([]);
 
   const getSquareName = (rowIndex: number, colIndex: number): Square => {
-    const file = files[colIndex];
-    const rank = 8 - rowIndex; // because top row is rank 8
-    return `${file}${rank}` as Square;
-  };
-  const pieceComponents: Record<string, JSX.Element> = {
-  wp: <Wpawn />,
-  bp: <Pawn />,
-  wr: <Wrook />,
-  br: <Rook />,
-  wn: <Wknight />,
-  bn: <Knight />,
-  wb: <Wbishop />,
-  bb: <Bishop />,
-  wq: <Wqueen />,
-  bq: <Queen />,
-  wk: <Wking />,
-  bk: <King />,
+  const actualRow = color === "black" ? 7 - rowIndex : rowIndex;
+  const actualCol = color === "black" ? 7 - colIndex : colIndex;
+  const file = files[actualCol];
+  const rank = 8 - actualRow;
+  return `${file}${rank}` as Square;
 };
-
-  
+  const pieceComponents: Record<string, JSX.Element> = {
+    wp: <Wpawn />,
+    bp: <Pawn />,
+    wr: <Wrook />,
+    br: <Rook />,
+    wn: <Wknight />,
+    bn: <Knight />,
+    wb: <Wbishop />,
+    bb: <Bishop />,
+    wq: <Wqueen />,
+    bq: <Queen />,
+    wk: <Wking />,
+    bk: <King />,
+  };
 
   return (
     <div>
       <div className="grid grid-cols-8 grid-rows-8 w-140 h-140">
-        {board.map((row, rowIndex) =>
-          row.map((square, colIndex) => {
+        
+        {(color === "black" ? [...board].reverse() : board).map((row, rowIndex) =>
+    (color === "black" ? [...row].reverse() : row).map((square, colIndex) => {
             const isBlack = (rowIndex + colIndex) % 2 === 1;
             const squareName = getSquareName(rowIndex, colIndex);
 
@@ -70,34 +73,91 @@ export const Chessboard = ({
               <div
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => {
-                  if (!from) {
-                    setFrom(squareName);
-                  } else {
-                    const moveTo = squareName;
-
-                    socket.send(
-                      JSON.stringify({
-                        type: MOVE,
-                        payload: { 
-                           move: {from,
-                             to: moveTo }
-                            },
-                      })
-                    );
-                    
-                    setFrom(null);
-                    chess.move({
-                        from,
-                        to: moveTo
-                    })
-                    setBoard(chess.board());
-                    onTurnChange(chess.turn() === "w" ? "white" : "black");
+                  //check if wrong player making move
+                  if(chess.turn() === "w" && color !== "white" ||chess.turn() === "b" && color !== "black" ){
+                    alert("not your bokachoda");
+                    return;
                   }
+                  //If no piece is selected yet
+                  if (!from) {
+                    if (!square) return; 
+                    setFrom(squareName);
+                    const moves = chess.moves({
+                      square: squareName,
+                      verbose: true,
+                    });
+                    const targets = moves.map((m) => m.to);
+                    SetHighlighted(targets);
+                    return;
+                  }
+
+                  //If clicked the same square again 
+                  if (from === squareName) {
+                    setFrom(null);
+                    SetHighlighted([]);
+                    return;
+                  }
+
+                  //If clicked another piece of same color
+                  const fromPiece = chess.get(from);
+                  const clickedPiece = chess.get(squareName);
+                  if (
+                    clickedPiece &&
+                    fromPiece &&
+                    clickedPiece.color === fromPiece.color
+                  ) {
+                    setFrom(squareName);
+                    const moves = chess.moves({
+                      square: squareName,
+                      verbose: true,
+                    });
+                    const targets = moves.map((m) => m.to);
+                    SetHighlighted(targets);
+                    return;
+                  }
+
+                  //Otherwise attempt a move
+                  const legalMoves = chess.moves({
+                    square: from,
+                    verbose: true,
+                  });
+                  const isValidMove = legalMoves.some(
+                    (m) => m.to === squareName
+                  );
+                  if (!isValidMove) {
+                    // invalid destination, ignore
+                    return;
+                  }
+
+                  // Make the move
+                  socket.send(
+                    JSON.stringify({
+                      type: MOVE,
+                      payload: { move: { from, to: squareName } },
+                    })
+                  );
+
+                  chess.move({ from, to: squareName });
+                  setBoard(chess.board());
+                  onTurnChange(chess.turn() === "w" ? "white" : "black");
+
+                  //Reset selection
+                  setFrom(null);
+                  SetHighlighted([]);
                 }}
                 className={`flex justify-center items-center text-2xl font-semibold
-                  ${isBlack ? "bg-[#9d4edd] text-white" : "bg-[#e0aaff] text-black"}`}
+                  ${
+                    isBlack
+                      ? "bg-[#9d4edd] text-white"
+                      : "bg-[#e0aaff] text-black"
+                  }`}
               >
-                {square ? pieceComponents[`${square.color}${square.type}`] : null}
+                {highlighted.includes(squareName) && (
+                  <div className="absolute w-4 h-4 bg-black rounded-full"></div>
+                )}
+                {square
+                  ? pieceComponents[`${square.color}${square.type}`]
+                  : null}
               </div>
             );
           })

@@ -15,22 +15,23 @@ export const Game = () => {
   const [color, setColor] = useState("");
   const [loader, setLoader] = useState(false);
   const [currentTurn, setCurrentTurn] = useState("white");
-  
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+
   useEffect(() => {
     if (!socket) {
       return;
     }
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("📨 Received from server:", message);
-      const color = message.payload.color;
-      setColor(color);
+      const colour = message.payload.color;
 
       switch (message.type) {
         case INIT_GAME:
           //initialize a game
           setBoard(chess.board());
           setStarted(true);
+          setColor(colour);
           break;
         case MOVE:
           //moving logic
@@ -39,10 +40,13 @@ export const Game = () => {
           console.log(move);
           chess.move(move);
           setBoard(chess.board());
-          
+          setCurrentTurn(chess.turn() === "w" ? "white" : "black");
           break;
         case GAME_OVER:
           //terminate game
+          const winnerColor = message.payload.winner;
+          setGameOver(true);
+          setWinner(winnerColor);
           break;
       }
     };
@@ -75,6 +79,7 @@ export const Game = () => {
             setBoard={setBoard}
             board={board}
             onTurnChange={setCurrentTurn}
+            color={color}
           />
         </div>
 
@@ -91,13 +96,34 @@ export const Game = () => {
           </button>
         )}
         {started && (
+          <div className="flex flex-col gap-7">
             <div className="text-white font-extrabold text-3xl ">
-                {color === "white" ? "You are player 1" : "You are player 2"}
+              {color === "white" ? "You are player 1" : "You are player 2"}
             </div>
-           
-         
+            <div className="text-white font-extrabold text-3xl ">
+              {currentTurn === "white" ? "Player 1 turn" : "Player 2 turn"}
+            </div>
+          </div>
         )}
       </div>
+      {gameOver && (
+        <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-70 z-50">
+          <div className="bg-[#302e2b] p-8 rounded-2xl shadow-xl text-center">
+            <h2 className="text-4xl text-white font-extrabold mb-4">
+              {winner === color ? "🏆 You Win!" : "😢 You Lose!"}
+            </h2>
+            <p className="text-gray-300 text-lg mb-6">
+              {winner?.toUpperCase()} wins the game!
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-[#9d4edd] hover:bg-[#7b2cbf] text-white font-bold rounded-lg transition-transform transform hover:scale-105"
+            >
+              Play Again
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
