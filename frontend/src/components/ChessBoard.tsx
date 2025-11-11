@@ -1,5 +1,5 @@
 import type { Color, PieceSymbol, Square } from "chess.js";
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { MOVE } from "../pages/Game";
 import Pawn from "./assests/Pawn";
 import Wpawn from "./assests/Wpawn";
@@ -20,7 +20,8 @@ export const Chessboard = ({
   board,
   socket,
   chess,
-  setBoard
+  setBoard,
+  onTurnChange
 }: {
   board: ({
     square: Square;
@@ -30,8 +31,10 @@ export const Chessboard = ({
   socket: WebSocket;
   chess: any;
   setBoard: any;
+  onTurnChange: any;
 }) => {
   const [from, setFrom] = useState<Square | null>(null);
+  
 
   const getSquareName = (rowIndex: number, colIndex: number): Square => {
     const file = files[colIndex];
@@ -57,7 +60,7 @@ export const Chessboard = ({
 
   return (
     <div>
-      <div className="grid grid-cols-8 grid-rows-8 w-96 h-96">
+      <div className="grid grid-cols-8 grid-rows-8 w-140 h-140">
         {board.map((row, rowIndex) =>
           row.map((square, colIndex) => {
             const isBlack = (rowIndex + colIndex) % 2 === 1;
@@ -88,10 +91,11 @@ export const Chessboard = ({
                         to: moveTo
                     })
                     setBoard(chess.board());
+                    onTurnChange(chess.turn() === "w" ? "white" : "black");
                   }
                 }}
                 className={`flex justify-center items-center text-2xl font-semibold
-                  ${isBlack ? "bg-gray-800 text-white" : "bg-gray-200 text-black"}`}
+                  ${isBlack ? "bg-[#9d4edd] text-white" : "bg-[#e0aaff] text-black"}`}
               >
                 {square ? pieceComponents[`${square.color}${square.type}`] : null}
               </div>
