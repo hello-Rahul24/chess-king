@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/mongoose": "^5.11.96",
     "@types/ws": "^8.18.1",
     "chess.js": "^1.4.0",
     "ws": "^8.18.3"

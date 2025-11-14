@@ -107,17 +107,18 @@ export const Game = () => {
         )}
       </div>
       {gameOver && (
-        <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-70 z-50">
-          <div className="bg-[#302e2b] p-8 rounded-2xl shadow-xl text-center">
-            <h2 className="text-4xl text-white font-extrabold mb-4">
+        <div className="absolute inset-0 flex flex-col justify-center items-center bg-black/50 backdrop-blur-md z-50 transition-all">
+          <div className="bg-[#1f1d1b]/90 p-10 rounded-2xl shadow-2xl text-center border border-white/10 animate-fadeIn">
+
+            <h2 className="text-5xl text-white font-extrabold mb-4 drop-shadow-lg">
               {winner === color ? "🏆 You Win!" : "😢 You Lose!"}
             </h2>
-            <p className="text-gray-300 text-lg mb-6">
-              {winner?.toUpperCase()} wins the game!
+            <p className="text-gray-300 text-lg mb-8">
+              {winner?.toUpperCase()} wins the match
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-[#9d4edd] hover:bg-[#7b2cbf] text-white font-bold rounded-lg transition-transform transform hover:scale-105"
+              className="px-8 py-3 bg-gradient-to-r from-[#9d4edd] to-[#7b2cbf] hover:opacity-90 text-white text-xl font-semibold rounded-xl shadow-md transition-transform transform hover:scale-105"
             >
               Play Again
             </button>
