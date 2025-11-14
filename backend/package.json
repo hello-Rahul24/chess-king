@@ -14,6 +14,10 @@
     "@types/mongoose": "^5.11.96",
     "@types/ws": "^8.18.1",
     "chess.js": "^1.4.0",
+    "express": "^5.1.0",
     "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5"
   }
 }

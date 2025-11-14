@@ -1,6 +1,6 @@
 "use strict";
 const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://girirahul2028_db_user:HpubPUIpLILEtPsm@paytm.ddhqe3i.mongodb.net/');
+mongoose.connect('mongodb+srv://girirahul2028_db_user:HpubPUIpLILEtPsm@paytm.ddhqe3i.mongodb.net/local');
 const userschema = new mongoose.Schema({
     username: String,
     password: String,
