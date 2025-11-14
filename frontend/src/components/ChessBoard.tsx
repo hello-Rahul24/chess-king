@@ -112,6 +112,7 @@ export const Chessboard = ({
                       square: squareName,
                       verbose: true,
                     });
+                    //@ts-ignore
                     const targets = moves.map((m) => m.to);
                     SetHighlighted(targets);
                     return;
@@ -122,7 +123,9 @@ export const Chessboard = ({
                     square: from,
                     verbose: true,
                   });
+                  
                   const isValidMove = legalMoves.some(
+                    //@ts-ignore
                     (m) => m.to === squareName
                   );
                   if (!isValidMove) {
